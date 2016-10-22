@@ -10,10 +10,8 @@ import com.coolweather.app.model.CoolWeatherDB;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 /**
@@ -25,8 +23,11 @@ public class Utility {
     public synchronized static int handleAreaResponse(CoolWeatherDB coolWeatherDB, String response, int parentId) {
         if (!TextUtils.isEmpty(response)) {
             try {
+                if(parentId > 40000){
+                return -1;
+            }
                 JSONObject jsonObject1 = new JSONObject(response);//获得原始json对象
-                JSONObject jsonObject2 = jsonObject1.getJSONObject("showapi_res_body");//获得需要的json对象
+                JSONObject jsonObject2 = jsonObject1.getJSONObject("showapi_res_body");
                 if(jsonObject2.getInt("ret_code") == -1){
                     return -1;
                 }
@@ -34,17 +35,19 @@ public class Utility {
                 for (int i = 0; i < jsonArray.length(); i++) {
                     Area area = new Area();
                     JSONObject jsonOb = jsonArray.getJSONObject(i);
-                    if (jsonOb.getInt("parentId") == parentId ) {
-                        area.setId(jsonOb.getInt("id"));
-                        area.setParentId(jsonOb.getInt("parentId"));
-                        area.setLevel(jsonOb.getInt("level"));
-                        area.setAreaName(jsonOb.getString("areaName"));
-                        if(parentId == 0) {
-                            area.setProvinceName(jsonOb.getString("areaName"));
-                        }else{
-                            area.setProvinceName(jsonOb.getString("provinceName"));
+                    if(!jsonOb.isNull("parentId")) {
+                        if (jsonOb.getInt("parentId") == parentId) {
+                            area.setId(jsonOb.getInt("id"));
+                            area.setParentId(jsonOb.getInt("parentId"));
+                            area.setLevel(jsonOb.getInt("level"));
+                            area.setAreaName(jsonOb.getString("areaName"));
+                            if (parentId == 0) {
+                                area.setProvinceName(jsonOb.getString("areaName"));
+                            } else {
+                                area.setProvinceName(jsonOb.getString("provinceName"));
+                            }
+                            coolWeatherDB.saveArea(area);
                         }
-                        coolWeatherDB.saveArea(area);
                     }
                 }
             } catch (JSONException e) {
@@ -78,7 +81,7 @@ public class Utility {
     }
 //将服务器返回天气信息存储到SharedPreferences
     private static void saveWeatherInfo(Context context, String cityName, String cityId, String temp1, String temp2, String weatherDesp, String publishTime) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy年m月d日", Locale.CHINA);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy年M月d日", Locale.CHINA);
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
         editor.putBoolean("city_selected", true);
         editor.putString("city_Name", cityName);
@@ -88,6 +91,7 @@ public class Utility {
         editor.putString("weather_desp", weatherDesp);
         editor.putString("publish_time", publishTime);
         editor.putString("current_date", sdf.format(new Date()));
+        Log.d("Test",new Date().toString());
         editor.commit();
     }
 }

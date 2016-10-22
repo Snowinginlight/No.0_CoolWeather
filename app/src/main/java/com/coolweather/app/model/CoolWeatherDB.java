@@ -4,10 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
-
 import com.coolweather.app.db.CoolWeatherOpenHelper;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +31,6 @@ public class CoolWeatherDB {
     }//获取CoolWeatherDb实例
 
     public void saveArea(Area area) {
-        Log.d("Test","this is saveArea"+area.getLevel());
         if (area != null) {
             ContentValues values = new ContentValues();
             values.put("id", area.getId());
@@ -42,13 +38,7 @@ public class CoolWeatherDB {
             values.put("level", area.getLevel());
             values.put("areaName", area.getAreaName());
             values.put("provinceName", area.getProvinceName());
-            if(area.getProvinceName()!=null){
-                Log.d("Test3","province is "+area.getProvinceName());
-            }
-            if(area.getAreaName()!=null) {
-                Log.d("Test3","area is "+area.getAreaName());
-            }
-                db.insert("Area", null, values);
+            db.insert("Area", null, values);
         }
     }
 

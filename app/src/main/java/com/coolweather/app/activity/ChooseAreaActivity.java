@@ -6,7 +6,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
+import android.text.TextUtils;;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -40,12 +40,15 @@ public class ChooseAreaActivity extends AppCompatActivity {
     private List<Area> areaList;
     private Area selectedArea;
     private int currentLevel;
+    private boolean isFromWeatherActivity;
+    private boolean closejundge;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        isFromWeatherActivity = getIntent().getBooleanExtra("from_weather_activity",false);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if (prefs.getBoolean("city_selected", false)) {
+        if (prefs.getBoolean("city_selected", false) && !isFromWeatherActivity) {
             Intent intent = new Intent(this, WeatherActivity.class);
             startActivity(intent);
             finish();
@@ -62,6 +65,7 @@ public class ChooseAreaActivity extends AppCompatActivity {
                                             @Override
                                             public void onItemClick(AdapterView<?> arg0, View view, int index, long arg3) {
                                                 selectedArea = areaList.get(index);
+                                                Log.d("Test","selectedArea id is "+selectedArea.getId());
                                                 queryArea(selectedArea.getProvinceName(), selectedArea.getLevel() + 1, selectedArea.getId(), selectedArea.getAreaName());
                                             }
                                         }
@@ -93,7 +97,6 @@ public class ChooseAreaActivity extends AppCompatActivity {
     }
 
     private void queryFromServer(final String Name, final int level, final int parentId, final String areaName) {
-        Log.d("Utility", "Name is " + Name + "\n level is" + level);
         String address;
         final String appid = "25945";
         final String secret = "eb3602222ece406d958501bfe52d3596";
@@ -162,7 +165,12 @@ public class ChooseAreaActivity extends AppCompatActivity {
         } else if (currentLevel == 2) {
             queryArea(null, 1, 0, null);
         } else {
-            finish();
+            if(isFromWeatherActivity){
+                Intent intent = new Intent(ChooseAreaActivity.this,WeatherActivity.class);
+                startActivity(intent);
+                ChooseAreaActivity.this.finish();
+                return;
+            }
         }
     }
 }

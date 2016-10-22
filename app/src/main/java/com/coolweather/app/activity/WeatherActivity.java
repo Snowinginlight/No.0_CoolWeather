@@ -1,17 +1,16 @@
 package com.coolweather.app.activity;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.coolweather.app.R;
 import com.coolweather.app.util.HttpCallbackListener;
 import com.coolweather.app.util.HttpUtil;
@@ -29,6 +28,8 @@ public class WeatherActivity extends AppCompatActivity {
     private TextView temp1Text;//用于显示日间气温
     private TextView temp2Text;//用于显示夜间气温
     private TextView currentDatetext;//用于显示当前日期
+    private Button switchCity;
+    private Button refreshWeather;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +43,28 @@ public class WeatherActivity extends AppCompatActivity {
         temp1Text = (TextView) findViewById(R.id.temp1);
         temp2Text = (TextView) findViewById(R.id.temp2);
         currentDatetext = (TextView) findViewById(R.id.current_date);
+        switchCity = (Button)findViewById(R.id.switch_city);
+        refreshWeather = (Button)findViewById(R.id.refresh_weather);
+        switchCity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(WeatherActivity.this,ChooseAreaActivity.class);
+                intent.putExtra("from_weather_activity",true);
+                startActivity(intent);
+                WeatherActivity.this.finish();
+            }
+        });
+        refreshWeather.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                publishText.setText("同步中...");
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this);
+                String areaName = prefs.getString("city_Name", "");
+                if(!TextUtils.isEmpty(areaName)){
+                    queryWeatherCode(areaName);
+                }
+            }
+        });
         /*
         *以下内容需大量修改
          */
@@ -98,7 +121,7 @@ public class WeatherActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        publishText.setText("同步失败");
+                        publishText.setText("同步失败,请检查网络或切换区域");
                     }
                 });
             }
@@ -111,9 +134,8 @@ public class WeatherActivity extends AppCompatActivity {
     private void showWeather() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         cityNameText.setText(prefs.getString("city_Name", ""));
-        Log.d("Weather","showWeather is "+prefs.getString("city_Name", ""));
-        temp1Text.setText(prefs.getString("temp1", ""));
-        temp2Text.setText(prefs.getString("temp2", ""));
+        temp1Text.setText(prefs.getString("temp1", "")+"℃");
+        temp2Text.setText(prefs.getString("temp2", "")+"℃");
         weatherDespText.setText(prefs.getString("weather_desp", ""));
         publishText.setText("今天" + prefs.getString("publish_time", "") + "发布");
         currentDatetext.setText(prefs.getString("current_date", ""));
@@ -121,5 +143,9 @@ public class WeatherActivity extends AppCompatActivity {
         cityNameText.setVisibility(View.VISIBLE);
     }
 
+    @Override
+    public void onBackPressed() {
+        finish();
+    }
 }
 
