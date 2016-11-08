@@ -1,2 +1,2 @@
-# No.0_CoolWeather
-A weather app demo in Android
+# CoolWeather
+《第一行代码》的 “酷欧天气”复原版。使用了省市API和天气API结合，并重新定义了数据库，第一个程序，纪念一下\(^o^)/~
